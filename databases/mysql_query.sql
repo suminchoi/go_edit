@@ -152,10 +152,52 @@ ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
+-- -----------------------------------------------------
+-- Table `shopping-cart`.`board`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `shopping-cart`.`board`;
+
+CREATE TABLE IF NOT EXISTS `shopping-cart`.`board` (
+  `id` INT AUTO_INCREMENT NOT NULL,
+  `title` VARCHAR(255) NOT NULL,
+  `content` TEXT NOT NULL,
+  `author` VARCHAR(50) NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `file_name` VARCHAR(255) NULL,
+  `file_size` INT NULL,
+  `file_content` LONGBLOB NULL,
+  PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `shopping-cart`.`comments`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `shopping-cart`.`comments`;
+
+CREATE TABLE IF NOT EXISTS `shopping-cart`.`comments` (
+  `id` INT AUTO_INCREMENT NOT NULL,
+  `board_id` INT NOT NULL,
+  `author` VARCHAR(50) NOT NULL,
+  `content` TEXT NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`board_id`) REFERENCES `board`(`id`) ON DELETE CASCADE
+) ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+
+
+
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
 
 -- -----------------------------------------------------
 -- Data for table `shopping-cart`.`product`
@@ -197,7 +239,6 @@ INSERT INTO `shopping-cart`.`orders` (`orderid`, `prodid`, `quantity`, `amount`,
 
 COMMIT;
 
-
 -- -----------------------------------------------------
 -- Data for table `shopping-cart`.`user`
 -- -----------------------------------------------------
@@ -238,3 +279,30 @@ INSERT INTO `shopping-cart`.`usercart` (`username`, `prodid`, `quantity`) VALUES
 
 COMMIT;
 
+-- -----------------------------------------------------
+-- Data for table `shopping-cart`.`board`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `shopping-cart`;
+
+-- 파일이 있는 경우
+INSERT INTO `shopping-cart`.`board` (`title`, `author`, `content`, `file_name`, `file_size`, `file_content`) 
+VALUES ('This is sample', 'guest@gmail.com', 'This is sample', 'sample.pdf', 12345, NULL);
+
+-- 파일이 없는 경우
+INSERT INTO `shopping-cart`.`board` (`title`, `author`, `content`, `file_name`, `file_size`, `file_content`) 
+VALUES ('This is sample without file', 'guest@gmail.com', 'This is sample content', NULL, NULL, NULL);
+
+COMMIT;
+
+START TRANSACTION;
+USE `shopping-cart`;
+
+-- 댓글 샘플 데이터 삽입
+INSERT INTO `shopping-cart`.`comments` (`board_id`, `author`, `content`) 
+VALUES (1, 'user1', 'This is a comment for the first post.');
+
+INSERT INTO `shopping-cart`.`comments` (`board_id`, `author`, `content`) 
+VALUES (2, 'user2', 'Another comment on the second post.');
+
+COMMIT;

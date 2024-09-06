@@ -52,6 +52,7 @@
 
 
 	<jsp:include page="header.jsp" />
+	
 
 	<div class="text-center"
 		style="color: black; font-size: 14px; font-weight: bold;"><%=message%></div>
