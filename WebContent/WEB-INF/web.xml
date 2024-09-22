@@ -1,4 +1,4 @@
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+﻿<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
          xmlns="http://xmlns.jcp.org/xml/ns/javaee" 
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" 
          id="WebApp_ID" version="3.1">
@@ -8,6 +8,22 @@
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
+
+    <!-- DefaultServlet 설정: 디렉토리 인덱싱 활성화 -->
+    <servlet>
+        <servlet-name>default</servlet-name>
+        <servlet-class>org.apache.catalina.servlets.DefaultServlet</servlet-class>
+        <init-param>
+            <param-name>listings</param-name>
+            <param-value>true</param-value> <!-- 디렉토리 인덱싱 활성화 -->
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>/</url-pattern> <!-- 루트 경로에 대해 디렉토리 인덱싱을 적용 -->
+    </servlet-mapping>
 
     <!-- boardWriteProcess.jsp를 위한 Multipart 설정 -->
     <servlet>

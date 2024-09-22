@@ -48,21 +48,21 @@
         .btn-container {
             display: flex;
             justify-content: space-between;
-            gap: 10px; /* 버튼 사이 간격 조정 */
+            gap: 10px;
             margin-top: 20px;
         }
         .sk-logo {
             position: absolute;
             top: 10px;
             left: 10px;
-            width: 100px; /* 로고 크기 조정 */
+            width: 100px;
             height: auto;
         }
     </style>
-/head>
+</head>
 <body>
     <!-- SK 로고 이미지 추가 -->
-    <img src="images/sk_shieldus_comm_rgb_kr.png" alt="SK Logo" class="sk-logo">
+    <img src="images/Shopping_Cart_Logo.png" alt="SK Logo" class="sk-logo">
     
     <div class="container board-write-container">
         <h2 class="title-section">게시글 작성</h2>
@@ -94,10 +94,12 @@
             </div>
             <div class="form-group">
                 <label for="content">내용</label>
-                <textarea class="form-control" id="content" name="content" rows="5" placeholder="내용을 입력하세요" required></textarea>
+                <!-- 큰 내용도 제한 없이 입력 가능하도록 설정 -->
+                <textarea class="form-control" id="content" name="content" rows="20" placeholder="내용을 입력하세요" required></textarea>
             </div>
             <div class="form-group">
                 <label for="uploadFile">파일 업로드</label>
+                <!-- 파일 크기 제한을 제거한 파일 업로드 -->
                 <input type="file" class="form-control-file" id="uploadFile" name="uploadFile">
             </div>
             <div class="btn-container">

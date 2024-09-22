@@ -1,125 +1,138 @@
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-	pageEncoding="ISO-8859-1"%>
-<%@ page
-	import="com.shashi.service.impl.*, com.shashi.service.*,com.shashi.beans.*,java.util.*,javax.servlet.ServletOutputStream,java.io.*"%>
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
+<%@ page import="com.shashi.service.impl.*, com.shashi.service.*,com.shashi.beans.*,java.util.*,javax.servlet.ServletOutputStream,java.io.*,javax.xml.parsers.*,javax.xml.xpath.*,org.w3c.dom.*"%>
 <!DOCTYPE html>
 <html>
 <head>
 <title>Ellison Electronics</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet"
-	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
 <link rel="stylesheet" href="css/changes.css">
-<script
-	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script
-	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 </head>
 <body style="background-color: #E6F9E6;">
 
-	<%
-	/* Checking the user credentials */
-	String userName = (String) session.getAttribute("username");
-	String password = (String) session.getAttribute("password");
-	String userType = (String) session.getAttribute("usertype");
+<%
+    /* Checking the user credentials */
+    String userName = (String) session.getAttribute("username");
+    String password = (String) session.getAttribute("password");
+    String userType = (String) session.getAttribute("usertype");
 
-	boolean isValidUser = true;
+    boolean isValidUser = true;
 
-	if (userType == null || userName == null || password == null || !userType.equals("customer")) {
+    if (userType == null || userName == null || password == null || !userType.equals("customer")) {
+        isValidUser = false;
+    }
 
-		isValidUser = false;
-	}
+    ProductServiceImpl prodDao = new ProductServiceImpl();
+    List<ProductBean> products = new ArrayList<ProductBean>();
 
-	ProductServiceImpl prodDao = new ProductServiceImpl();
-	List<ProductBean> products = new ArrayList<ProductBean>();
+    String search = request.getParameter("search");
+    String type = request.getParameter("type");
+    String message = "All Products";
+    
+    // Adding an XPath search example
+    if (search != null) {
+        try {
+            // Load XML document from WEB-INF
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            // Load the XML file from WEB-INF
+            Document doc = builder.parse(new File(getServletContext().getRealPath("/WEB-INF/products.xml")));
 
-	String search = request.getParameter("search");
-	String type = request.getParameter("type");
-	String message = "All Products";
-	if (search != null) {
-		products = prodDao.searchAllProducts(search);
-		message = "Showing Results for '" + search + "'";
-	} else if (type != null) {
-		products = prodDao.getAllProductsByType(type);
-		message = "Showing Results for '" + type + "'";
-	} else {
-		products = prodDao.getAllProducts();
-	}
-	if (products.isEmpty()) {
-		message = "No items found for the search '" + (search != null ? search : type) + "'";
-		products = prodDao.getAllProducts();
-	}
-	%>
+            // Create XPath expression with user input (vulnerable to XPath Injection)
+            XPathFactory xPathFactory = XPathFactory.newInstance();
+            XPath xpath = xPathFactory.newXPath();
+            String xpathQuery = "/products/product[name/text()='" + search + "']";
+            XPathExpression expr = xpath.compile(xpathQuery);
+            NodeList nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
 
-	<jsp:include page="header.jsp" />
+            // Display search results
+            if (nodes.getLength() > 0) {
+                message = "Showing Results for '" + search + "'";
+                for (int i = 0; i < nodes.getLength(); i++) {
+                    // Assume you have a way to create ProductBean from the XML Node
+                    ProductBean product = new ProductBean();
+                    product.setProdName(nodes.item(i).getTextContent());
+                    // Add other product properties here...
+                    products.add(product);
+                }
+            } else {
+                message = "No items found for the search '" + search + "'";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            message = "Error processing search";
+        }
+    } else if (type != null) {
+        products = prodDao.getAllProductsByType(type);
+        message = "Showing Results for '" + type + "'";
+    } else {
+        products = prodDao.getAllProducts();
+    }
 
-	<div class="text-center"
-		style="color: black; font-size: 14px; font-weight: bold;"><%=message%></div>
-	<div class="text-center" id="message"
-		style="color: black; font-size: 14px; font-weight: bold;"></div>
-	<!-- Start of Product Items List -->
-	<div class="container">
-		<div class="row text-center">
+    if (products.isEmpty()) {
+        message = "No items found for the search '" + (search != null ? search : type) + "'";
+        products = prodDao.getAllProducts();
+    }
+%>
 
-			<%
-			for (ProductBean product : products) {
-				int cartQty = new CartServiceImpl().getCartItemCount(userName, product.getProdId());
-			%>
-			<div class="col-sm-4" style='height: 350px;'>
-				<div class="thumbnail">
-					<img src="./ShowImage?pid=<%=product.getProdId()%>" alt="Product"
-						style="height: 150px; max-width: 180px">
-					<p class="productname"><%=product.getProdName()%>
-					</p>
-					<%
-					String description = product.getProdInfo();
-					description = description.substring(0, Math.min(description.length(), 100));
-					%>
-					<p class="productinfo"><%=description%>..
-					</p>
-					<p class="price">
-						Rs
-						<%=product.getProdPrice()%>
-					</p>
-					<form method="post">
-						<%
-						if (cartQty == 0) {
-						%>
-						<button type="submit"
-							formaction="./AddtoCart?uid=<%=userName%>&pid=<%=product.getProdId()%>&pqty=1"
-							class="btn btn-success">Add to Cart</button>
-						&nbsp;&nbsp;&nbsp;
-						<button type="submit"
-							formaction="./AddtoCart?uid=<%=userName%>&pid=<%=product.getProdId()%>&pqty=1"
-							class="btn btn-primary">Buy Now</button>
-						<%
-						} else {
-						%>
-						<button type="submit"
-							formaction="./AddtoCart?uid=<%=userName%>&pid=<%=product.getProdId()%>&pqty=0"
-							class="btn btn-danger">Remove From Cart</button>
-						&nbsp;&nbsp;&nbsp;
-						<button type="submit" formaction="cartDetails.jsp"
-							class="btn btn-success">Checkout</button>
-						<%
-						}
-						%>
-					</form>
-					<br />
-				</div>
-			</div>
+<jsp:include page="header.jsp" />
 
-			<%
-			}
-			%>
+<div class="text-center" style="color: black; font-size: 14px; font-weight: bold;"><%=message%></div>
+<div class="text-center" id="message" style="color: black; font-size: 14px; font-weight: bold;"></div>
 
-		</div>
-	</div>
-	<!-- ENd of Product Items List -->
+<!-- Start of Product Items List -->
+<div class="container">
+    <div class="row text-center">
+        <%
+        for (ProductBean product : products) {
+            int cartQty = new CartServiceImpl().getCartItemCount(userName, product.getProdId());
+        %>
+        <div class="col-sm-4" style='height: 350px;'>
+            <div class="thumbnail">
+                <img src="./ShowImage?pid=<%=product.getProdId()%>" alt="Product" style="height: 150px; max-width: 180px">
+                <p class="productname"><%=product.getProdName()%></p>
+                <%
+                // Null 체크 추가: description이 null일 경우 기본값 설정
+                String description = product.getProdInfo();
+                if (description == null) {
+                    description = "No description available"; // 기본값 설정
+                } else {
+                    description = description.substring(0, Math.min(description.length(), 100));
+                }
+                %>
+                <p class="productinfo"><%= description %>..</p>
+                <p class="price">Rs <%=product.getProdPrice()%></p>
+                <form method="post">
+                    <%
+                    if (cartQty == 0) {
+                    %>
+                    <button type="submit" formaction="./AddtoCart?uid=<%=userName%>&pid=<%=product.getProdId()%>&pqty=1" class="btn btn-success">Add to Cart</button>
+                    &nbsp;&nbsp;&nbsp;
+                    <button type="submit" formaction="./AddtoCart?uid=<%=userName%>&pid=<%=product.getProdId()%>&pqty=1" class="btn btn-primary">Buy Now</button>
+                    <%
+                    } else {
+                    %>
+                    <button type="submit" formaction="./AddtoCart?uid=<%=userName%>&pid=<%=product.getProdId()%>&pqty=0" class="btn btn-danger">Remove From Cart</button>
+                    &nbsp;&nbsp;&nbsp;
+                    <button type="submit" formaction="cartDetails.jsp" class="btn btn-success">Checkout</button>
+                    <%
+                    }
+                    %>
+                </form>
+                <br />
+            </div>
+        </div>
+        <%
+        }
+        %>
+    </div>
+</div>
+<!-- End of Product Items List -->
 
-
-	<%@ include file="footer.html"%>
+<%@ include file="footer.html"%>
 
 </body>
 </html>

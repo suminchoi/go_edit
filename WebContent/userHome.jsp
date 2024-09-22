@@ -19,49 +19,45 @@
 <body style="background-color: #E6F9E6;">
 
 	<%
-	/* Checking the user credentials */
-	String userName = (String) session.getAttribute("username");
-	String password = (String) session.getAttribute("password");
+		// 세션 유효성 검사 (기본 제공 session 객체 사용)
+		if (session == null || session.getAttribute("username") == null) {
+			// 세션이 없거나 만료된 경우 로그인 페이지로 리디렉션
+			response.sendRedirect("login.jsp?message=Session Expired, Login Again!!");
+			return; // 리다이렉트 후 더 이상 실행하지 않도록 처리
+		}
+		
+		// 세션에서 사용자 정보 가져오기
+		String userName = (String) session.getAttribute("username");
 
-	if (userName == null || password == null) {
+		ProductServiceImpl prodDao = new ProductServiceImpl();
+		List<ProductBean> products = new ArrayList<ProductBean>();
 
-		response.sendRedirect("login.jsp?message=Session Expired, Login Again!!");
-	}
-
-	ProductServiceImpl prodDao = new ProductServiceImpl();
-	List<ProductBean> products = new ArrayList<ProductBean>();
-
-	String search = request.getParameter("search");
-	String type = request.getParameter("type");
-	String message = "All Products";
-	if (search != null) {
-		products = prodDao.searchAllProducts(search);
-		message = "Showing Results for '" + search + "'";
-	} else if (type != null) {
-		products = prodDao.getAllProductsByType(type);
-		message = "Showing Results for '" + type + "'";
-	} else {
-		products = prodDao.getAllProducts();
-	}
-	if (products.isEmpty()) {
-		message = "No items found for the search '" + (search != null ? search : type) + "'";
-		products = prodDao.getAllProducts();
-	}
+		String search = request.getParameter("search");
+		String type = request.getParameter("type");
+		String message = "All Products";
+		if (search != null) {
+			products = prodDao.searchAllProducts(search);
+			message = "Showing Results for '" + search + "'";
+		} else if (type != null) {
+			products = prodDao.getAllProductsByType(type);
+			message = "Showing Results for '" + type + "'";
+		} else {
+			products = prodDao.getAllProducts();
+		}
+		if (products.isEmpty()) {
+			message = "No items found for the search '" + (search != null ? search : type) + "'";
+			products = prodDao.getAllProducts();
+		}
 	%>
 
-
-
 	<jsp:include page="header.jsp" />
-	
 
 	<div class="text-center"
 		style="color: black; font-size: 14px; font-weight: bold;"><%=message%></div>
-	<!-- <script>document.getElementById('mycart').innerHTML='<i data-count="20" class="fa fa-shopping-cart fa-3x icon-white badge" style="background-color:#333;margin:0px;padding:0px; margin-top:5px;"></i>'</script>
- -->
+
 	<!-- Start of Product Items List -->
 	<div class="container">
 		<div class="row text-center">
-
 			<%
 			for (ProductBean product : products) {
 				int cartQty = new CartServiceImpl().getCartItemCount(userName, product.getProdId());
@@ -70,18 +66,13 @@
 				<div class="thumbnail">
 					<img src="./ShowImage?pid=<%=product.getProdId()%>" alt="Product"
 						style="height: 150px; max-width: 180px">
-					<p class="productname"><%=product.getProdName()%>
-					</p>
+					<p class="productname"><%=product.getProdName()%></p>
 					<%
 					String description = product.getProdInfo();
 					description = description.substring(0, Math.min(description.length(), 100));
 					%>
-					<p class="productinfo"><%=description%>..
-					</p>
-					<p class="price">
-						Rs
-						<%=product.getProdPrice()%>
-					</p>
+					<p class="productinfo"><%=description%>..</p>
+					<p class="price">Rs <%=product.getProdPrice()%></p>
 					<form method="post">
 						<%
 						if (cartQty == 0) {
@@ -109,15 +100,12 @@
 					<br />
 				</div>
 			</div>
-
 			<%
 			}
 			%>
-
 		</div>
 	</div>
-	<!-- ENd of Product Items List -->
-
+	<!-- End of Product Items List -->
 
 	<%@ include file="footer.html"%>
 

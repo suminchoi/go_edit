@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>게시글 상세 보기</title>
     <link rel="stylesheet" href="css/bootstrap.css">
-    <link rel="stylesheet" href="css/ganjibutton.css"> <!-- ganjibutton.css 스타일 적용 -->
+    <link rel="stylesheet" href="css/ganjibutton.css">
     <style>
         body {
             margin: 0;
@@ -41,7 +41,7 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
-            margin-top: 30px; /* 댓글 작성 칸 위 간격 추가 */
+            margin-top: 30px;
         }
         .comment-box {
             background-color: #e8f5e9;
@@ -68,7 +68,7 @@
             margin-top: 20px;
         }
         .btn-container .btn {
-            padding: 10px 50px; /* 버튼 크기 키움 */
+            padding: 10px 50px;
             font-size: 1rem;
         }
         .sk-logo {
@@ -78,32 +78,46 @@
             width: 100px;
             height: auto;
         }
-   </style>
+    </style>
 </head>
 <body>
     <!-- SK 로고 이미지 추가 -->
-    <img src="images/sk_shieldus_comm_rgb_kr.png" alt="SK Logo" class="sk-logo">
+    <img src="images/Shopping_Cart_Logo.png" alt="SK Logo" class="sk-logo">
     
     <div class="container board-detail-container">
         <%
-            // 로그인한 사용자 정보 가져오기
-        
             String loggedInUser = null;
             
             if (session != null) {
-                loggedInUser = (String) session.getAttribute("username"); // 세션에서 사용자 이름 가져오기
+                loggedInUser = (String) session.getAttribute("username");
             }
 
-            int id = Integer.parseInt(request.getParameter("id"));
-            // UTF-8 인코딩 설정 추가
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/shopping-cart?useUnicode=true&characterEncoding=UTF-8", "root", "1234");
-            PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM board WHERE id = ?");
-            pstmt.setInt(1, id);
-            ResultSet rs = pstmt.executeQuery();
+            String idParam = request.getParameter("id");
+            int id = 0;
 
-            if (rs.next()) {
-                String fileName = rs.getString("file_name");
-                String postAuthor = rs.getString("author"); // 게시글 작성자 정보 가져오기
+            try {
+                id = Integer.parseInt(idParam);
+            } catch (NumberFormatException e) {
+                out.println("올바르지 않은 ID 값입니다.");
+                return;
+            }
+
+            Connection conn = null;
+            PreparedStatement pstmt = null;
+            ResultSet rs = null;
+
+            try {
+                // 데이터베이스 연결
+                conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/shopping-cart?useUnicode=true&characterEncoding=UTF-8", "root", "1234");
+                // PreparedStatement를 사용하여 안전하게 SQL 실행
+                String sql = "SELECT * FROM board WHERE id = ?";
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setInt(1, id);
+                rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    String fileName = rs.getString("file_name");
+                    String postAuthor = rs.getString("author");
         %>
         <!-- 제목 박스 -->
         <div class="content-box">
@@ -142,7 +156,6 @@
         <!-- 버튼 섹션 -->
         <div class="btn-container">
             <% if (loggedInUser != null && loggedInUser.equals(postAuthor)) { %>
-                <!-- 삭제 버튼은 로그인한 사용자와 작성자가 동일할 때만 표시 -->
                 <a href="boardDelete.jsp?id=<%= rs.getInt("id") %>" class="btn btn-danger ganjibutton">삭제</a>
             <% } %>
             <a href="boardList.jsp" class="btn btn-secondary ganjibutton">목록으로</a>
@@ -179,11 +192,21 @@
                 </div>
             <%
                 }
+                commentRs.close();
             %>
         </div>
         <%
+            } else {
+                out.println("게시글을 찾을 수 없습니다.");
             }
-            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            out.println("데이터베이스 오류가 발생했습니다: " + e.getMessage());
+        } finally {
+            if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
+            if (pstmt != null) try { pstmt.close(); } catch (SQLException ignore) {}
+            if (conn != null) try { conn.close(); } catch (SQLException ignore) {}
+        }
         %>
     </div>
 </body>

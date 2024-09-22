@@ -110,7 +110,7 @@
         }
 
         .action-buttons {
-            margin-bottom: 20px; /* 글쓰기 버튼과 게시글 목록 간의 간격 조정 */
+            margin-bottom: 20px;
         }
 
         .pagination {
@@ -140,15 +140,15 @@
         }
 
         .board-table {
-            border: 2px solid #000; /* 테이블 전체 테두리 검정색 */
-            border-collapse: collapse; /* 셀 간의 겹침 제거 */
+            border: 2px solid #000;
+            border-collapse: collapse;
         }
 
         .board-table th, .board-table td {
-            border: 1px solid #000 !important; /* 각 셀의 테두리 강제로 검정색 적용 */
-            padding: 8px; /* 셀의 내부 여백 */
-            text-align: center; /* 텍스트 중앙 정렬 */
-            background-clip: padding-box; /* 셀 테두리 영역 문제 해결 */
+            border: 1px solid #000 !important;
+            padding: 8px;
+            text-align: center;
+            background-clip: padding-box;
         }
     </style>
     <script>
@@ -174,16 +174,13 @@
     </script>
 </head>
 <body>
-    <!-- 상단 로고 이미지 추가 -->
     <img src="images/sk_shieldus_comm_rgb_kr.png" alt="SK 쉴더스 로고" class="header-image">
 
-    <!-- 타이틀 섹션 -->
     <div class="title-section" onclick="goToBoard()">
         게시판
     </div>
 
     <div class="container mt-4 board-content">
-        <!-- 검색 섹션 -->
         <form class="search-section" method="get" action="boardList.jsp">
             <div class="search-inputs">
                 <input type="text" name="searchKeyword" placeholder="검색어 입력" class="form-control">
@@ -198,67 +195,48 @@
             <a href="userHome.jsp" class="btn btn-main"><span>메인 홈</span></a>
         </form>
 
-        <!-- 글쓰기 버튼 -->
         <div class="action-buttons">
             <a href="boardWrite.jsp" class="btn btn-write"><span>글쓰기</span></a>
         </div>
 
         <%
-            // 페이지네이션 설정
-            int pageSize = 10; // 한 페이지에 보여줄 글 수
+            int pageSize = 10;  // 한 페이지에 표시할 게시글 수
             int pageNumber = 1; // 현재 페이지 번호
             if (request.getParameter("page") != null) {
                 pageNumber = Integer.parseInt(request.getParameter("page"));
             }
             int startRow = (pageNumber - 1) * pageSize;
 
-            // 데이터베이스 연결
             Connection conn = null;
             Statement stmt = null;
             ResultSet rs = null;
-            Statement countStmt = null;
-            ResultSet countRs = null;
 
             String searchKeyword = request.getParameter("searchKeyword");
             String searchType = request.getParameter("searchType");
             String startDate = request.getParameter("startDate");
             String endDate = request.getParameter("endDate");
 
-            // 기본 쿼리 (Statement 사용)
-            String sql = "SELECT * FROM board WHERE 1=1"; 
-            String countSql = "SELECT COUNT(*) FROM board WHERE 1=1"; 
+            // SQL 쿼리 시작
+            String sql = "SELECT * FROM board WHERE 1=1";
 
             // 검색 조건에 따른 쿼리 수정
             if (searchKeyword != null && !searchKeyword.isEmpty()) {
-                if ("title".equals(searchType)) {
-                    sql += " AND title LIKE '%" + searchKeyword + "%'";
-                    countSql += " AND title LIKE '%" + searchKeyword + "%'";
-                } else if ("author".equals(searchType)) {
-                    sql += " AND author LIKE '%" + searchKeyword + "%'";
-                    countSql += " AND author LIKE '%" + searchKeyword + "%'";
-                }
+                sql += " AND " + searchType + " LIKE '%" + searchKeyword + "%'";
             }
 
-            // 날짜 범위 필터링
+            // 날짜 필터링 - 수정된 부분
             if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
-                sql += " AND created_at BETWEEN '" + startDate + " 00:00:00' AND '" + endDate + " 23:59:59'";
-                countSql += " AND created_at BETWEEN '" + startDate + " 00:00:00' AND '" + endDate + " 23:59:59'";
+                sql += " AND created_at BETWEEN '" + startDate + "' AND '" + endDate + "'";
             }
 
-            sql += " ORDER BY created_at DESC LIMIT " + startRow + ", " + pageSize; // 페이징 처리
+            sql += " ORDER BY created_at DESC LIMIT " + startRow + ", " + pageSize;
+
             try {
                 conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/shopping-cart?useUnicode=true&characterEncoding=utf8", "root", "1234");
-                
-                // 총 글 수 가져오기 (Statement 사용)
-                countStmt = conn.createStatement();
-                countRs = countStmt.executeQuery(countSql);
-                countRs.next();
-                int totalRows = countRs.getInt(1);
-                int totalPages = (int) Math.ceil((double) totalRows / pageSize);
-
-                // 게시글 가져오기
                 stmt = conn.createStatement();
                 rs = stmt.executeQuery(sql);
+
+                // 게시글 목록 출력
         %>
                 <table class="table table-striped jua-regular board-table">
                     <thead>
@@ -288,9 +266,28 @@
                     </tbody>
                 </table>
 
-                <!-- 페이지네이션 -->
                 <div class="pagination">
                     <%
+                    // 페이지네이션 계산을 위한 전체 게시글 수 쿼리
+                    String countSql = "SELECT COUNT(*) AS total FROM board WHERE 1=1";
+
+                    // 검색 조건이 있으면 동일하게 적용
+                    if (searchKeyword != null && !searchKeyword.isEmpty()) {
+                        countSql += " AND " + searchType + " LIKE '%" + searchKeyword + "%'";
+                    }
+                    if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+                        countSql += " AND created_at BETWEEN '" + startDate + "' AND '" + endDate + "'";
+                    }
+
+                    // 총 게시글 수 조회
+                    ResultSet countRs = stmt.executeQuery(countSql);
+                    countRs.next();
+                    int totalPosts = countRs.getInt("total");
+
+                    // 총 페이지 수 계산
+                    int totalPages = (int) Math.ceil(totalPosts / (double) pageSize);
+
+                    // 페이지 번호 출력
                     for (int i = 1; i <= totalPages; i++) {
                         if (i == pageNumber) {
                             %>
@@ -302,6 +299,7 @@
                             <%
                         }
                     }
+                    countRs.close();
                     %>
                 </div>
 
@@ -310,8 +308,6 @@
                 e.printStackTrace();
                 out.println("게시글을 불러오는 중 오류가 발생했습니다: " + e.getMessage());
             } finally {
-                if (countRs != null) try { countRs.close(); } catch (SQLException ignore) {}
-                if (countStmt != null) try { countStmt.close(); } catch (SQLException ignore) {}
                 if (rs != null) try { rs.close(); } catch (SQLException ignore) {}
                 if (stmt != null) try { stmt.close(); } catch (SQLException ignore) {}
                 if (conn != null) try { conn.close(); } catch (SQLException ignore) {}
