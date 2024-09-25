@@ -14,7 +14,7 @@
     try {
         // 데이터베이스 연결 - UTF-8 인코딩 설정 추가
         Class.forName("com.mysql.cj.jdbc.Driver");
-        conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/shopping-cart?useUnicode=true&characterEncoding=UTF-8", "root", "1234");
+        conn = DriverManager.getConnection("jdbc:mysql://10.0.2.37:3306/shopping-cart?useUnicode=true&characterEncoding=UTF-8", "dbuser", "1234");
 
         // 댓글 삽입 쿼리
         String query = "INSERT INTO comments (board_id, author, content) VALUES (?, ?, ?)";

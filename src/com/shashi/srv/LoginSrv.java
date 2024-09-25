@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import com.shashi.beans.UserBean;
 import com.shashi.service.impl.UserServiceImpl;
 
 @WebServlet("/LoginSrv")
@@ -24,32 +25,34 @@ public class LoginSrv extends HttpServlet {
 
         String status = "Login Denied! Invalid Username or password.";
 
-        // 로그인 검증 로직
-        UserServiceImpl userService = new UserServiceImpl();
-        status = userService.isValidCredential(userName, password); // 로그인 검증
-
-        // 디버깅을 위한 로그
-        System.out.println("Login Status: " + status);
-
-        if (status.equals("valid")) {
-            // 세션 생성 및 사용자 정보 설정
-            HttpSession session = request.getSession(); // 세션 생성 또는 가져오기
-            session.setAttribute("username", userName);
-            session.setAttribute("usertype", userType);
-
-            // 세션 유효 시간 설정 (30분)
-            session.setMaxInactiveInterval(30 * 60);
-
-            // 사용자 유형에 따라 리디렉션 처리
-            if (userType.equals("admin")) {
-                response.sendRedirect("adminViewProduct.jsp");
+        if (userType.equals("admin")) {
+            if (password.equals("admin") && userName.equals("admin@gmail.com")) {
+                RequestDispatcher rd = request.getRequestDispatcher("adminViewProduct.jsp");
+                HttpSession session = request.getSession();
+                session.setAttribute("username", userName);
+                session.setAttribute("password", password);
+                session.setAttribute("usertype", userType);
+                rd.forward(request, response);
             } else {
-                response.sendRedirect("userHome.jsp");
+                RequestDispatcher rd = request.getRequestDispatcher("login.jsp?message=" + status);
+                rd.include(request, response);
             }
         } else {
-            // 로그인 실패 시 다시 로그인 페이지로 이동
-            RequestDispatcher rd = request.getRequestDispatcher("login.jsp?message=" + status);
-            rd.forward(request, response);
+            UserServiceImpl udao = new UserServiceImpl();
+            status = udao.isValidCredential(userName, password);
+            if (status.equalsIgnoreCase("valid")) {
+                UserBean user = udao.getUserDetails(userName, password);
+                HttpSession session = request.getSession();
+                session.setAttribute("userdata", user);
+                session.setAttribute("username", userName);
+                session.setAttribute("password", password);
+                session.setAttribute("usertype", userType);
+                RequestDispatcher rd = request.getRequestDispatcher("userHome.jsp");
+                rd.forward(request, response);
+            } else {
+                RequestDispatcher rd = request.getRequestDispatcher("login.jsp?message=" + status);
+                rd.forward(request, response);
+            }
         }
     }
 

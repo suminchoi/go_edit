@@ -2,17 +2,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Login</title>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-<link rel="stylesheet" href="css/changes.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <title>Login</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/changes.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 </head>
 <body style="background-color: #E6F9E6;">
+
     <%@ include file="header.jsp" %>
+
     <%
         String message = request.getParameter("message");
     %>
+
     <div class="container">
         <div class="row" style="margin-top: 5px; margin-left: 2px; margin-right: 2px;">
             <form action="./LoginSrv" method="post" class="col-md-4 col-md-offset-4 col-sm-8 col-sm-offset-2"
@@ -20,21 +23,19 @@
                 <div style="font-weight: bold;" class="text-center">
                     <h2 style="color: green;">Login Form</h2>
                     <% if (message != null) { %>
-                    <p style="color: blue;"><%= message %></p>
+                        <p style="color: blue;"><%= message %></p>
                     <% } %>
                 </div>
                 <div class="row">
                     <div class="col-md-12 form-group">
                         <label for="username">Username</label>
-                        <input type="text" placeholder="Enter Username" name="username" class="form-control"
-                            id="username" required>
+                        <input type="text" placeholder="Enter Username" name="username" class="form-control" id="username" required>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12 form-group">
                         <label for="password">Password</label>
-                        <input type="password" placeholder="Enter Password" name="password" class="form-control"
-                            id="password" required>
+                        <input type="password" placeholder="Enter Password" name="password" class="form-control" id="password" required>
                     </div>
                 </div>
                 <div class="row">
@@ -60,6 +61,8 @@
             </form>
         </div>
     </div>
-    <%@ include file="footer.html" %>
+
+    <jsp:include page="footer.html" />
+
 </body>
 </html>

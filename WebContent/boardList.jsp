@@ -232,7 +232,7 @@
             sql += " ORDER BY created_at DESC LIMIT " + startRow + ", " + pageSize;
 
             try {
-                conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/shopping-cart?useUnicode=true&characterEncoding=utf8", "root", "1234");
+                conn = DriverManager.getConnection("jdbc:mysql://10.0.2.37:3306/shopping-cart?useUnicode=true&characterEncoding=utf8", "dbuser", "1234");
                 stmt = conn.createStatement();
                 rs = stmt.executeQuery(sql);
 

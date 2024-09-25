@@ -25,7 +25,7 @@
 
     try {
         // 데이터베이스 연결
-        conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/shopping-cart?useUnicode=true&characterEncoding=utf8", "root", "1234");
+        conn = DriverManager.getConnection("jdbc:mysql://10.0.2.37:3306/shopping-cart?useUnicode=true&characterEncoding=utf8", "dbuser", "1234");
 
         // 삭제 쿼리 실행
         String sql = "DELETE FROM board WHERE id = ?";

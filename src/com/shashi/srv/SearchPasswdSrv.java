@@ -16,8 +16,8 @@ public class SearchPasswdSrv extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     // 데이터베이스 연결 정보
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/shopping-cart?useUnicode=true&characterEncoding=utf8";
-    private static final String DB_USER = "root";  // DB 사용자 이름
+    private static final String DB_URL = "jdbc:mysql://10.0.2.37:3306/shopping-cart?useUnicode=true&characterEncoding=utf8";
+    private static final String DB_USER = "dbuser";  // DB 사용자 이름
     private static final String DB_PASSWORD = "1234";  // DB 비밀번호
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

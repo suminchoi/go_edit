@@ -27,7 +27,7 @@
         out.println("Warning: You are entering large data that might cause issues.");
     }
 
-    try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/shopping-cart?useUnicode=true&characterEncoding=utf8", "root", "1234")) {
+    try (Connection conn = DriverManager.getConnection("jdbc:mysql://10.0.2.37:3306/shopping-cart?useUnicode=true&characterEncoding=utf8", "dbuser", "1234")) {
         // 데이터베이스에 게시글 저장
         String sql = "INSERT INTO board (title, author, content, file_name, file_size, file_content) VALUES (?, ?, ?, ?, ?, ?)";
         PreparedStatement pstmt = conn.prepareStatement(sql);

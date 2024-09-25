@@ -18,7 +18,7 @@
         // 게시판 파일 다운로드 기능: id 파라미터가 있는 경우
         if (fileId != null) {
             // 데이터베이스 연결
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/shopping-cart?useUnicode=true&characterEncoding=utf8", "root", "1234");
+            conn = DriverManager.getConnection("jdbc:mysql://10.0.2.37:3306/shopping-cart?useUnicode=true&characterEncoding=utf8", "dbuser", "1234");
 
             // 파일 정보를 가져오는 SQL 쿼리
             String sql = "SELECT file_name, file_content FROM board WHERE id = ?";
