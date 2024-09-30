@@ -8,17 +8,20 @@
     <title>게시판</title>
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/ganjibutton.css">
+    <link rel="stylesheet" href="css/changes.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
         body {
-            font-family: 'Jua', sans-serif;
+            font-family: 'Roboto', sans-serif;
             color: #000;
+            background-color: #C1E1C1; /* 초록색 파스텔톤 배경 */
         }
 
         .header-image {
             position: absolute;
-            top: 10px;
-            left: 10px;
+            top: 0px;
+            left: 0px; /* 로고를 화면 왼쪽으로 이동 */
             width: 150px;
             transition: transform 0.6s;
             transform-style: preserve-3d;
@@ -33,26 +36,15 @@
             font-size: 3rem;
             font-weight: bold;
             margin-top: 20px;
-            animation: rainbow 2s infinite alternate;
+            color: #000; /* 검은색으로 변경 */
             cursor: pointer;
-        }
-
-        @keyframes rainbow {
-            0% { color: #ff0000; }
-            14% { color: #ff7f00; }
-            28% { color: #ffff00; }
-            42% { color: #00ff00; }
-            57% { color: #0000ff; }
-            71% { color: #4b0082; }
-            85% { color: #9400d3; }
-            100% { color: #ff0000; }
         }
 
         .search-section {
             display: flex;
             align-items: center;
             padding: 10px;
-            background-color: rgba(255, 255, 255, 0);
+            background-color: rgba(255, 255, 255, 0.8);
             border: 2px solid #333;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -91,13 +83,12 @@
             background-color: #222;
             padding: 17px 30px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
+            transition: background-color 0.3s ease;
             border-radius: 5px;
         }
 
         .btn:hover {
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-            transform: translateY(-2px);
+            background-color: #555; /* 버튼 색상 변화를 부드럽게 */
         }
 
         .btn-search, .btn-write {
@@ -142,6 +133,7 @@
         .board-table {
             border: 2px solid #000;
             border-collapse: collapse;
+            font-family: 'Roboto', sans-serif; /* 게시판 목록 글씨체 통일 */
         }
 
         .board-table th, .board-table td {
@@ -174,7 +166,7 @@
     </script>
 </head>
 <body>
-    <img src="images/sk_shieldus_comm_rgb_kr.png" alt="SK 쉴더스 로고" class="header-image">
+    <img src="images/Shopping_Cart_Logo.png" alt="Shopping Cart 로고" class="header-image">
 
     <div class="title-section" onclick="goToBoard()">
         게시판
@@ -200,8 +192,8 @@
         </div>
 
         <%
-            int pageSize = 10;  // 한 페이지에 표시할 게시글 수
-            int pageNumber = 1; // 현재 페이지 번호
+            int pageSize = 10;
+            int pageNumber = 1;
             if (request.getParameter("page") != null) {
                 pageNumber = Integer.parseInt(request.getParameter("page"));
             }
@@ -216,15 +208,12 @@
             String startDate = request.getParameter("startDate");
             String endDate = request.getParameter("endDate");
 
-            // SQL 쿼리 시작
             String sql = "SELECT * FROM board WHERE 1=1";
 
-            // 검색 조건에 따른 쿼리 수정
             if (searchKeyword != null && !searchKeyword.isEmpty()) {
                 sql += " AND " + searchType + " LIKE '%" + searchKeyword + "%'";
             }
 
-            // 날짜 필터링 - 수정된 부분
             if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
                 sql += " AND created_at BETWEEN '" + startDate + "' AND '" + endDate + "'";
             }
@@ -232,13 +221,11 @@
             sql += " ORDER BY created_at DESC LIMIT " + startRow + ", " + pageSize;
 
             try {
-                conn = DriverManager.getConnection("jdbc:mysql://10.0.2.37:3306/shopping-cart?useUnicode=true&characterEncoding=utf8", "dbuser", "1234");
+                conn = DriverManager.getConnection("jdbc:mysql://18.183.202.201:3306/shopping-cart?useUnicode=true&characterEncoding=utf8", "dbuser", "1234");
                 stmt = conn.createStatement();
                 rs = stmt.executeQuery(sql);
-
-                // 게시글 목록 출력
         %>
-                <table class="table table-striped jua-regular board-table">
+                <table class="table table-striped board-table">
                     <thead>
                         <tr>
                             <th>번호</th>
@@ -268,10 +255,8 @@
 
                 <div class="pagination">
                     <%
-                    // 페이지네이션 계산을 위한 전체 게시글 수 쿼리
                     String countSql = "SELECT COUNT(*) AS total FROM board WHERE 1=1";
 
-                    // 검색 조건이 있으면 동일하게 적용
                     if (searchKeyword != null && !searchKeyword.isEmpty()) {
                         countSql += " AND " + searchType + " LIKE '%" + searchKeyword + "%'";
                     }
@@ -279,15 +264,12 @@
                         countSql += " AND created_at BETWEEN '" + startDate + "' AND '" + endDate + "'";
                     }
 
-                    // 총 게시글 수 조회
                     ResultSet countRs = stmt.executeQuery(countSql);
                     countRs.next();
                     int totalPosts = countRs.getInt("total");
 
-                    // 총 페이지 수 계산
                     int totalPages = (int) Math.ceil(totalPosts / (double) pageSize);
 
-                    // 페이지 번호 출력
                     for (int i = 1; i <= totalPages; i++) {
                         if (i == pageNumber) {
                             %>

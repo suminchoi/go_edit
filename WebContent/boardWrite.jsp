@@ -1,5 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="javax.servlet.http.HttpSession" %>
+<%@ page import="java.io.File" %>
+<%@ page import="javax.servlet.ServletException" %>
+<%@ page import="javax.servlet.http.Part" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -9,6 +12,8 @@
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/ganjibutton.css"> <!-- ganjibutton.css 스타일 적용 -->
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap'); /* Roboto 폰트 적용 */
+
         body {
             margin: 0;
             height: 100vh;
@@ -16,7 +21,7 @@
             background-repeat: no-repeat;
             background-size: cover;
             background-attachment: fixed;
-            font-family: "Jua", sans-serif;
+            font-family: 'Roboto', sans-serif; /* 폰트 변경 */
         }
         .board-write-container {
             max-width: 800px;
@@ -48,21 +53,21 @@
         .btn-container {
             display: flex;
             justify-content: space-between;
-            gap: 10px;
+            gap: 10px; /* 버튼 사이 간격 조정 */
             margin-top: 20px;
         }
         .sk-logo {
             position: absolute;
             top: 10px;
             left: 10px;
-            width: 100px;
+            width: 100px; /* 로고 크기 조정 */
             height: auto;
         }
     </style>
 </head>
 <body>
-    <!-- SK 로고 이미지 추가 -->
-    <img src="images/Shopping_Cart_Logo.png" alt="SK Logo" class="sk-logo">
+    <!-- 로고 이미지 추가 -->
+    <img src="images/Shopping_Cart_Logo.png" alt="Shopping Cart 로고" class="sk-logo">
     
     <div class="container board-write-container">
         <h2 class="title-section">게시글 작성</h2>
@@ -94,12 +99,10 @@
             </div>
             <div class="form-group">
                 <label for="content">내용</label>
-                <!-- 큰 내용도 제한 없이 입력 가능하도록 설정 -->
-                <textarea class="form-control" id="content" name="content" rows="20" placeholder="내용을 입력하세요" required></textarea>
+                <textarea class="form-control" id="content" name="content" rows="5" placeholder="내용을 입력하세요" required></textarea>
             </div>
             <div class="form-group">
                 <label for="uploadFile">파일 업로드</label>
-                <!-- 파일 크기 제한을 제거한 파일 업로드 -->
                 <input type="file" class="form-control-file" id="uploadFile" name="uploadFile">
             </div>
             <div class="btn-container">
@@ -107,6 +110,25 @@
                 <a href="boardList.jsp" class="btn ganjibutton" style="flex: 1;">목록으로</a>
             </div>
         </form>
+
+        <!-- 업로드 처리 부분 -->
+        <%
+            if (request.getMethod().equalsIgnoreCase("POST")) {
+                // 파일 저장 경로
+                String savePath = application.getRealPath("/") + "uploads";
+                File fileSaveDir = new File(savePath);
+                if (!fileSaveDir.exists()) {
+                    fileSaveDir.mkdirs(); // 디렉토리가 없을 경우 생성
+                }
+
+                // 파일 업로드 처리
+                Part filePart = request.getPart("uploadFile");
+                if (filePart != null && filePart.getSize() > 0) {
+                    String fileName = filePart.getSubmittedFileName();
+                    filePart.write(savePath + File.separator + fileName); // 파일 저장
+                }
+            }
+        %>
     </div>
 </body>
 </html>

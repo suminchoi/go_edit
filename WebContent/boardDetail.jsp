@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/ganjibutton.css">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap'); /* 폰트 설정 */
+
         body {
             margin: 0;
             height: 100vh;
@@ -17,7 +19,7 @@
             background-repeat: no-repeat;
             background-size: cover;
             background-attachment: fixed;
-            font-family: "Jua", sans-serif;
+            font-family: 'Roboto', sans-serif; /* 폰트 변경 */
         }
         .board-detail-container {
             max-width: 800px;
@@ -73,16 +75,16 @@
         }
         .sk-logo {
             position: absolute;
-            top: 10px;
-            left: 10px;
+            top: 0; /* 맨 위로 */
+            left: 0; /* 왼쪽으로 */
             width: 100px;
             height: auto;
         }
     </style>
 </head>
 <body>
-    <!-- SK 로고 이미지 추가 -->
-    <img src="images/Shopping_Cart_Logo.png" alt="SK Logo" class="sk-logo">
+    <!-- 카트 로고 이미지 추가 -->
+    <img src="images/Shopping_Cart_Logo.png" alt="Shopping Cart 로고" class="sk-logo">
     
     <div class="container board-detail-container">
         <%
@@ -108,7 +110,7 @@
 
             try {
                 // 데이터베이스 연결
-                conn = DriverManager.getConnection("jdbc:mysql://10.0.2.37:3306/shopping-cart?useUnicode=true&characterEncoding=UTF-8", "dbuser", "1234");
+                conn = DriverManager.getConnection("jdbc:mysql://18.183.202.201:3306/shopping-cart?useUnicode=true&characterEncoding=UTF-8", "dbuser", "1234");
                 // PreparedStatement를 사용하여 안전하게 SQL 실행
                 String sql = "SELECT * FROM board WHERE id = ?";
                 pstmt = conn.prepareStatement(sql);
